@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: devstats-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_USERNAME=${GITHUB_USERNAME}
+      - PORT=3000
+      - DATABASE_PATH=/app/data/devstats.db
+    volumes:
+      - ./backend/data:/app/data
+      - ./backend/src:/app/src
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: devstats-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    volumes:
+      - ./frontend/src:/app/src
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+volumes:
+  backend-data:
